@@ -26,7 +26,7 @@ spark-shell --master spark://localhost:7077
 
 ## Tags
 
-We have tags for each Spark version starting `1.6.0` to `2.3.2`. The tags `1` and `1.6` point to the `1.6.3` which is the latest release for that major/minor version. Similarly `2` and `2.3` point to `2.3.2`. `latest` always points to latest Spark release which in this case is `2.3.2`.
+We have tags for each Spark version starting `1.6.0` to `2.4.0`. The tags `1` and `1.6` point to the `1.6.3` which is the latest release for that major/minor version. Similarly `2` and `2.4` point to `2.4.0`. `latest` always points to latest Spark release which in this case is `2.4.0`.
 
 Newer Edge tags have been added. These tags build Spark from the source and should have the most recent code. The motivation behind adding these was to make testing/usage of the newer Spark code which has not been released, easier. We have tags starting from `edge-1.6` to `edge-2.2` for each minor Spark release and correspond to their respective branches on Github. `edge` points to the `master` branch. However these images are very bloated and it's hard to manually trigger their build as we don't know when the `apache/spark` repository changes. Some work needs to be done around keeping them up to date.
 
