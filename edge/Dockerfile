@@ -38,7 +38,13 @@ RUN git clone -b $SPARK_BRANCH https://github.com/apache/spark.git \
 ### Spark edge tarball consumer.
 FROM aa8y/core:jdk8
 
-MAINTAINER Arun Allamsetty <arun.allamsetty@gmail.com>
+LABEL org.opencontainers.image.authors="https://github.com/aa8y" \
+      org.opencontainers.image.description="Apache Spark image built from source (edge), on Alpine, bundled with Hadoop client libraries." \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.source="https://github.com/aa8y/docker-spark" \
+      org.opencontainers.image.title="aa8y/spark (edge)" \
+      org.opencontainers.image.url="https://hub.docker.com/r/aa8y/spark" \
+      org.opencontainers.image.vendor="https://github.com/aa8y"
 
 USER root
 
