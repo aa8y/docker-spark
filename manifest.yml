@@ -10,9 +10,11 @@ structureTest:
     - test/config/sparkpi.yaml
 contexts:
   stable:
+    parameters:
+      jdk_version: '8'
     templates:
       build: >
-        docker build -t {{{repository}}}:{{tag}} --build-arg HADOOP_VERSION={{hadoop_version}} --build-arg SPARK_VERSION={{spark_version}} {{context}}
+        docker build -t {{{repository}}}:{{tag}} --build-arg HADOOP_VERSION={{hadoop_version}} --build-arg JDK_VERSION={{jdk_version}} --build-arg SPARK_VERSION={{spark_version}} {{context}}
     tag_keys:
       - spark_version
     tags:
@@ -61,10 +63,11 @@ contexts:
         spark_version: 2.4.0
   edge:
     parameters:
+      jdk_version: '8'
       scala_version: '2.11'
     templates:
       build: >
-        docker build -t {{{repository}}}:{{tag}} --build-arg HADOOP_VERSION={{hadoop_version}} --build-arg SCALA_VERSION={{scala_version}} --build-arg SPARK_BRANCH={{branch}} --build-arg SPARK_VERSION={{spark_version}} {{context}}
+        docker build -t {{{repository}}}:{{tag}} --build-arg HADOOP_VERSION={{hadoop_version}} --build-arg JDK_VERSION={{jdk_version}} --build-arg SCALA_VERSION={{scala_version}} --build-arg SPARK_BRANCH={{branch}} --build-arg SPARK_VERSION={{spark_version}} {{context}}
     tags:
       edge-1.6:
         branch: branch-1.6
