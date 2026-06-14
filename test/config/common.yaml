@@ -1,0 +1,43 @@
+schemaVersion: "2.0.0"
+
+# Shared assertions for every aa8y/spark image: install layout, the spark/hadoop
+# users, the WORKDIR + USER metadata, and a smoke check that the spark-shell
+# script is at least invokable. The version banner and the SparkPi example run
+# live in version.yaml / sparkpi.yaml because both take longer and aren't worth
+# repeating across the structural checks.
+
+metadataTest:
+  workdir: /opt/spark
+  user: spark
+  envVars:
+    - key: HADOOP_HOME
+      value: /opt/hadoop
+    - key: SPARK_HOME
+      value: /opt/spark
+
+fileExistenceTests:
+  - name: "SPARK_HOME exists"
+    path: /opt/spark
+    shouldExist: true
+    isDirectory: true
+  - name: "HADOOP_HOME exists"
+    path: /opt/hadoop
+    shouldExist: true
+    isDirectory: true
+  - name: "spark-shell launcher exists"
+    path: /opt/spark/bin/spark-shell
+    shouldExist: true
+  - name: "run-example launcher exists"
+    path: /opt/spark/bin/run-example
+    shouldExist: true
+  - name: "hadoop launcher exists"
+    path: /opt/hadoop/bin/hadoop
+    shouldExist: true
+
+commandTests:
+  - name: "spark-shell --help exits cleanly"
+    # The fastest invocation that exercises the launcher script + the
+    # SPARK_DIST_CLASSPATH wiring without spinning up a JVM session.
+    command: sh
+    args: ["-c", "spark-shell --help >/dev/null 2>&1 && echo ok"]
+    expectedOutput: ["^ok$"]

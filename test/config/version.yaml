@@ -1,0 +1,13 @@
+schemaVersion: "2.0.0"
+
+# `spark-shell --version` prints the Spark banner (logo + "version X.Y.Z") via
+# log4j, which routes it to stderr across every Spark line we publish. We merge
+# stderr into stdout so the regex doesn't depend on which stream the launcher
+# happened to pick this release. The version regex is intentionally loose so
+# the same config applies to 1.6 through 3.5 without per-tag duplication.
+
+commandTests:
+  - name: "spark-shell --version prints the Spark version banner"
+    command: sh
+    args: ["-c", "spark-shell --version 2>&1"]
+    expectedOutput: ["version [123]\\.[0-9]+\\.[0-9]+"]

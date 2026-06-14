@@ -3,7 +3,11 @@ parameters:
   hadoop_version: 2.7.7
 templates:
   push: docker push {{{repository}}}:{{tag}}
-  test: docker run --rm {{{repository}}}:{{tag}} spark-shell --version
+structureTest:
+  configs:
+    - test/config/common.yaml
+    - test/config/version.yaml
+    - test/config/sparkpi.yaml
 contexts:
   stable:
     templates:

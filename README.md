@@ -1,5 +1,7 @@
 # Docker Spark
 
+[![CI](https://github.com/aa8y/docker-spark/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/aa8y/docker-spark/actions/workflows/ci.yml)
+
 [Apache Spark](http://spark.apache.org) is a framework for doing distributed Big Data processing. This project contains files to build a Docker image for Spark. It is a fork of [semantive/spark](https://github.com/Semantive/docker-spark) but has been modified to use Alpine as base to make the final image smaller. It can be used in a standalone cluster or with the accompanying `docker-compose.yml` as a base for more complex recipes.
 
 ## Simple example
@@ -34,7 +36,26 @@ You can always refer to the `manifest.yml` file for more information about the i
 
 ### Building / Pushing / Tagging docker images
 
-[Docker Helper](https://github.com/aa8y/docker-helper) has been deprecated. The project now uses [Dave](https://github.com/aa8y/dave) which is vastly superior. TravisCI builds, tests and pushes the `stable` tags. To build additional tags, fork the repository, enable TravisCI for your fork, change the `manifest.yml` file and follow [instructions in Dave](https://github.com/aa8y/dave#travisci).
+The project uses [Dave](https://github.com/aa8y/dave) to build, test, and push images, driven by GitHub Actions on every push to `master`. To build additional tags, fork the repository, edit `manifest.yml`, and let the workflow in `.github/workflows/ci.yml` take it from there.
+
+### Testing
+
+Image tests are defined as [container-structure-test][cst] configs under
+`test/config/` — a shared `common.yaml` plus a version-banner check and a
+SparkPi end-to-end run. The configs apply to every `stable` tag (declared
+once in `manifest.yml` under `structureTest:`) and run natively via
+`dave structure-test`:
+
+```sh
+brew install container-structure-test     # one-time
+
+dave build --context stable
+dave structure-test --context stable
+```
+
+CI runs the same commands; see `.github/workflows/ci.yml`.
+
+[cst]: https://github.com/GoogleContainerTools/container-structure-test
 
 ### Dockerfiles
 

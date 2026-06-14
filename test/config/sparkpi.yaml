@@ -1,0 +1,13 @@
+schemaVersion: "2.0.0"
+
+# End-to-end sanity check: run the SparkPi example with two partitions and
+# look for the expected "Pi is roughly" line. Catches packaging regressions
+# the version banner can't (missing JARs, broken SPARK_DIST_CLASSPATH, JVM
+# incompat with the chosen JDK base). Two partitions keeps the run short
+# enough for CI; we don't care about the numerical accuracy.
+
+commandTests:
+  - name: "run-example SparkPi computes Pi"
+    command: sh
+    args: ["-c", "run-example SparkPi 2 2>&1"]
+    expectedOutput: ["Pi is roughly 3\\."]
