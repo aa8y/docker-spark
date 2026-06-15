@@ -1,6 +1,5 @@
 parameters:
   repository: aa8y/spark
-  hadoop_version: 2.7.7
 templates:
   push: docker push {{{repository}}}:{{tag}}
 structureTest:
@@ -10,82 +9,42 @@ structureTest:
     - test/config/sparkpi.yaml
 contexts:
   stable:
-    parameters:
-      jdk_version: '8'
     templates:
       build: >
-        docker build -t {{{repository}}}:{{tag}} --build-arg HADOOP_VERSION={{hadoop_version}} --build-arg JDK_VERSION={{jdk_version}} --build-arg SPARK_VERSION={{spark_version}} {{context}}
+        docker build -t {{{repository}}}:{{tag}}
+        --build-arg HADOOP_VERSION={{hadoop_version}}
+        --build-arg JDK_VERSION={{jdk_version}}
+        --build-arg SPARK_HADOOP_PROFILE={{spark_hadoop_profile}}
+        --build-arg SPARK_VERSION={{spark_version}}
+        {{context}}
     tag_keys:
       - spark_version
     tags:
-      '1.6.0':
-        hadoop_version: 2.6.5
-      '1.6.1':
-        hadoop_version: 2.6.5
-      '1.6.2':
-        hadoop_version: 2.6.5
-      '1.6.3':
-        hadoop_version: 2.6.5
-      '2.0.0':
-      '2.0.1':
-      '2.0.2':
-      '2.1.0':
-      '2.1.1':
-      '2.1.2':
-      '2.1.3':
-      '2.2.0':
-      '2.2.1':
-      '2.2.2':
-      '2.2.3':
-      '2.3.0':
-      '2.3.1':
-      '2.3.2':
-      '2.4.0':
-      '1.6':
-        hadoop_version: 2.6.5
-        spark_version: 1.6.3
-      '1':
-        hadoop_version: 2.6.5
-        spark_version: 1.6.3
-      '2.0':
-        spark_version: 2.0.2
-      '2.1':
-        spark_version: 2.1.3
-      '2.2':
-        spark_version: 2.2.3
-      '2.3':
-        spark_version: 2.3.2
+      '2.4.8':
+        hadoop_version: 2.7.7
+        jdk_version: '8'
+        spark_hadoop_profile: hadoop2.7
+      '3.5.8':
+        hadoop_version: 3.3.6
+        jdk_version: '17'
+        spark_hadoop_profile: hadoop3
       '2.4':
-        spark_version: 2.4.0
-      '2':
-        spark_version: 2.4.0
+        hadoop_version: 2.7.7
+        jdk_version: '8'
+        spark_hadoop_profile: hadoop2.7
+        spark_version: 2.4.8
+      '3.5':
+        hadoop_version: 3.3.6
+        jdk_version: '17'
+        spark_hadoop_profile: hadoop3
+        spark_version: 3.5.8
+      '3':
+        hadoop_version: 3.3.6
+        jdk_version: '17'
+        spark_hadoop_profile: hadoop3
+        spark_version: 3.5.8
       'latest':
-        spark_version: 2.4.0
-  edge:
-    parameters:
-      jdk_version: '8'
-      scala_version: '2.11'
-    templates:
-      build: >
-        docker build -t {{{repository}}}:{{tag}} --build-arg HADOOP_VERSION={{hadoop_version}} --build-arg JDK_VERSION={{jdk_version}} --build-arg SCALA_VERSION={{scala_version}} --build-arg SPARK_BRANCH={{branch}} --build-arg SPARK_VERSION={{spark_version}} {{context}}
-    tags:
-      edge-1.6:
-        branch: branch-1.6
-        hadoop_version: 2.6.5
-        scala_version: '2.10'
-        spark_version: 1.6.4
-      edge-2.0:
-        branch: branch-2.0
-        spark_version: 2.0.3
-      edge-2.1:
-        branch: branch-2.1
-        spark_version: 2.1.3
-      edge-2.2:
-        branch: branch-2.2
-        spark_version: 2.2.2
-      edge-2.3:
-        branch: branch-2.3
-        spark_version: 2.3.1
-      edge:
-        branch: master
-        spark_version: 2.4.0
+        hadoop_version: 3.3.6
+        jdk_version: '17'
+        spark_hadoop_profile: hadoop3
+        spark_version: 3.5.8

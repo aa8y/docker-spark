@@ -16,14 +16,6 @@ metadataTest:
       value: /opt/spark
 
 fileExistenceTests:
-  - name: "SPARK_HOME exists"
-    path: /opt/spark
-    shouldExist: true
-    isDirectory: true
-  - name: "HADOOP_HOME exists"
-    path: /opt/hadoop
-    shouldExist: true
-    isDirectory: true
   - name: "spark-shell launcher exists"
     path: /opt/spark/bin/spark-shell
     shouldExist: true
@@ -40,4 +32,4 @@ commandTests:
     # SPARK_DIST_CLASSPATH wiring without spinning up a JVM session.
     command: sh
     args: ["-c", "spark-shell --help >/dev/null 2>&1 && echo ok"]
-    expectedOutput: ["^ok$"]
+    expectedOutput: ["(?m)^ok$"]

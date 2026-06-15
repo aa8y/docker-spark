@@ -28,11 +28,25 @@ spark-shell --master spark://localhost:7077
 
 ## Tags
 
-We have tags for each Spark version starting `1.6.0` to `2.4.0`. The tags `1` and `1.6` point to the `1.6.3` which is the latest release for that major/minor version. Similarly `2` and `2.4` point to `2.4.0`. `latest` always points to latest Spark release which in this case is `2.4.0`.
+Only the latest patch of each supported Spark minor line is published.
+`latest` tracks the newest stable; `3` is an alias for the newest 3.x.
 
-Newer Edge tags have been added. These tags build Spark from the source and should have the most recent code. The motivation behind adding these was to make testing/usage of the newer Spark code which has not been released, easier. We have tags starting from `edge-1.6` to `edge-2.2` for each minor Spark release and correspond to their respective branches on Github. `edge` points to the `master` branch. However these images are very bloated and it's hard to manually trigger their build as we don't know when the `apache/spark` repository changes. Some work needs to be done around keeping them up to date.
+| Tag      | Spark version | Hadoop  | JDK |
+|----------|---------------|---------|-----|
+| `2.4.8`  | 2.4.8         | 2.7.7   | 8   |
+| `2.4`    | 2.4.8         | 2.7.7   | 8   |
+| `3.5.8`  | 3.5.8         | 3.3.6   | 17  |
+| `3.5`    | 3.5.8         | 3.3.6   | 17  |
+| `3`      | 3.5.8         | 3.3.6   | 17  |
+| `latest` | 3.5.8         | 3.3.6   | 17  |
 
-You can always refer to the `manifest.yml` file for more information about the images being built (see below).
+Spark 2.4 is pinned to JDK 8 because the 2.x line never ran on JDK 11+.
+Spark 3.5 ships JDK 8/11/17 support; we pair it with JDK 17 (Amazon
+Corretto via `aa8y/core:jdk17`) as the most forward-leaning supported
+option. The pre-2.4 tags (`1.6.x`, `2.0.x`–`2.3.x`) and the
+source-built `edge-*` tags have been retired — Apache EOL'd those
+lines and the edge build no longer applies cleanly to current Spark.
+See `manifest.yml` for the full matrix.
 
 ### Building / Pushing / Tagging docker images
 
@@ -49,24 +63,17 @@ once in `manifest.yml` under `structureTest:`) and run natively via
 ```sh
 brew install container-structure-test     # one-time
 
-dave build --context stable
-dave structure-test --context stable
+dave build
+dave structure-test
 ```
 
 CI runs the same commands; see `.github/workflows/ci.yml`.
 
 [cst]: https://github.com/GoogleContainerTools/container-structure-test
 
-### Dockerfiles
+### Dockerfile
 
-This is for the benefit of Docker Hub where you cannot host multiple `Dockerfile`s.
 * [Stable](https://github.com/aa8y/docker-spark/blob/master/stable/Dockerfile)
-* [Edge](https://github.com/aa8y/docker-spark/blob/master/edge/Dockerfile)
-
-## Future Work
-
-* Add `nightly` tags built from [official nightly builds](https://people.apache.org/~pwendell/spark-nightly/).
-* Provision to keep `edge` and `nightly` tags up to date.
 
 ## License
 

@@ -9,8 +9,12 @@ LABEL org.opencontainers.image.authors="https://github.com/aa8y" \
       org.opencontainers.image.url="https://hub.docker.com/r/aa8y/spark" \
       org.opencontainers.image.vendor="https://github.com/aa8y"
 
-ARG HADOOP_VERSION=2.7.7
-ARG SPARK_VERSION=2.4.0
+ARG HADOOP_VERSION=3.3.6
+ARG SPARK_VERSION=3.5.8
+# Suffix on the Spark "bin-<profile>" tarball. The 2.x line tags this with the
+# Hadoop major.minor (`hadoop2.7`), 3.x drops to a single digit (`hadoop3`),
+# so we take it as an explicit build-arg rather than trying to derive it.
+ARG SPARK_HADOOP_PROFILE=hadoop3
 
 ENV HADOOP_HOME=/opt/hadoop \
     HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop \
@@ -18,33 +22,30 @@ ENV HADOOP_HOME=/opt/hadoop \
     LD_LIBRARY_PATH=/opt/hadoop/lib/native \
     PATH=/opt/hadoop/bin:/opt/spark/bin:${PATH}
 
-# SPARK_DIST_CLASSPATH is what wires Spark to the bundled Hadoop client jars.
-# Defined separately because every entry expands $HADOOP_HOME and that's
-# easier to read on one logical line than crammed into the block above.
+# Wires Spark to the bundled Hadoop client jars.
 ENV SPARK_DIST_CLASSPATH="${HADOOP_HOME}/etc/hadoop/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/hdfs/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/yarn/lib/*:${HADOOP_HOME}/share/hadoop/yarn/*:${HADOOP_HOME}/share/hadoop/mapreduce/lib/*:${HADOOP_HOME}/share/hadoop/mapreduce/*:${HADOOP_HOME}/share/hadoop/tools/lib/*"
 
 USER root
-# Hadoop: install the client tarball that matches the major.minor of the
-# requested HADOOP_VERSION, then strip docs to keep the layer small. We pull
-# from archive.apache.org because the old cs.utah.edu mirror is long dead and
-# the archive is the only host guaranteed to keep older Hadoop releases.
-RUN adduser -Ds /bin/bash hadoop && \
-    mkdir -p "${HADOOP_HOME}" && \
+# Hadoop client install. Stays root-owned read-only; the spark user reads from
+# it via SPARK_DIST_CLASSPATH and doesn't need write access. Progress is
+# emitted at every 1 GiB tick so the build log stays readable but a hung
+# fetch is still obvious — `-q` silently kept this layer dark.
+RUN mkdir -p "${HADOOP_HOME}" && \
     apk add --no-cache wget && \
-    wget -q -O- --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 \
+    wget -O- --progress=dot:giga --retry-connrefused --waitretry=5 --read-timeout=120 --timeout=30 -t 5 \
       "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | \
       tar -xz --strip 1 -C "${HADOOP_HOME}/" && \
     apk del --purge wget && \
-    rm -rf /var/cache/apk/* "${HADOOP_HOME}/share/doc" && \
-    chown -R hadoop:hadoop "${HADOOP_HOME}"
+    rm -rf /var/cache/apk/* "${HADOOP_HOME}/share/doc"
 
-# Spark: pick the bin-hadoopX.Y tarball matching the host Hadoop major.minor.
+# Spark install. The `bin-${SPARK_HADOOP_PROFILE}` tarball ships Spark plus
+# the JARs needed to talk to that Hadoop line; the Hadoop client above
+# provides the matching binaries and native libs.
 RUN adduser -Ds /bin/bash spark && \
     mkdir -p "${SPARK_HOME}" && \
     apk add --no-cache wget && \
-    SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-hadoop$(echo "${HADOOP_VERSION}" | sed 's/\.[0-9]$//g')" && \
-    wget -q -O- --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 \
-      "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/${SPARK_PACKAGE}.tgz" | \
+    wget -O- --progress=dot:giga --retry-connrefused --waitretry=5 --read-timeout=120 --timeout=30 -t 5 \
+      "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${SPARK_HADOOP_PROFILE}.tgz" | \
       tar -xz --strip 1 -C "${SPARK_HOME}/" && \
     apk del --purge wget && \
     rm -rf /var/cache/apk/* && \

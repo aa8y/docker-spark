@@ -34,10 +34,10 @@ jobs:
           sudo mv /tmp/cst /usr/local/bin/container-structure-test
 
       - name: Build images
-        run: dave build --context stable
+        run: dave build
 
       - name: Test images
-        run: dave structure-test --context stable
+        run: dave structure-test
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -48,4 +48,4 @@ jobs:
 
       - name: Push images
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: dave push --context stable
+        run: dave push
