@@ -1,7 +1,6 @@
 parameters:
   repository: aa8y/spark
-templates:
-  push: docker push {{{repository}}}:{{tag}}
+  platforms: linux/amd64,linux/arm64
 structureTest:
   configs:
     - test/config/common.yaml
@@ -10,8 +9,23 @@ structureTest:
 contexts:
   stable:
     templates:
+      # build loads a single-arch image into the local daemon so CST can run
+      # it on the same runner. CI per-arch matrix sets $PLATFORM; locally it
+      # stays unset and buildx picks the host arch.
       build: >
-        docker build -t {{{repository}}}:{{tag}}
+        docker buildx build --load ${PLATFORM:+--platform "$PLATFORM"}
+        -t {{{repository}}}:{{tag}}
+        --build-arg HADOOP_VERSION={{hadoop_version}}
+        --build-arg JDK_VERSION={{jdk_version}}
+        --build-arg SPARK_HADOOP_PROFILE={{spark_hadoop_profile}}
+        --build-arg SPARK_VERSION={{spark_version}}
+        {{context}}
+      # push does the real multi-arch build + push to the registry in one
+      # buildx call. No `dave build` output is reused — buildx rebuilds for
+      # every platform listed in `platforms`.
+      push: >
+        docker buildx build --push --platform {{{platforms}}}
+        -t {{{repository}}}:{{tag}}
         --build-arg HADOOP_VERSION={{hadoop_version}}
         --build-arg JDK_VERSION={{jdk_version}}
         --build-arg SPARK_HADOOP_PROFILE={{spark_hadoop_profile}}
