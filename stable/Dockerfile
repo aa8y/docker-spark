@@ -29,10 +29,12 @@ USER root
 # Hadoop client install. Stays root-owned read-only; the spark user reads from
 # it via SPARK_DIST_CLASSPATH and doesn't need write access. Progress is
 # emitted at every 1 GiB tick so the build log stays readable but a hung
-# fetch is still obvious — `-q` silently kept this layer dark.
+# fetch is still obvious — `-q` silently kept this layer dark. Retry budget
+# is intentionally tight (2 tries, 60s read idle) so a slow/dead archive
+# mirror fails inside the CI job timeout instead of grinding silently.
 RUN mkdir -p "${HADOOP_HOME}" && \
     apk add --no-cache wget && \
-    wget -O- --progress=dot:giga --retry-connrefused --waitretry=5 --read-timeout=120 --timeout=30 -t 5 \
+    wget -O- --progress=dot:giga --retry-connrefused --waitretry=2 --read-timeout=60 --timeout=30 -t 2 \
       "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | \
       tar -xz --strip 1 -C "${HADOOP_HOME}/" && \
     apk del --purge wget && \
@@ -44,7 +46,7 @@ RUN mkdir -p "${HADOOP_HOME}" && \
 RUN adduser -Ds /bin/bash spark && \
     mkdir -p "${SPARK_HOME}" && \
     apk add --no-cache wget && \
-    wget -O- --progress=dot:giga --retry-connrefused --waitretry=5 --read-timeout=120 --timeout=30 -t 5 \
+    wget -O- --progress=dot:giga --retry-connrefused --waitretry=2 --read-timeout=60 --timeout=30 -t 2 \
       "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${SPARK_HADOOP_PROFILE}.tgz" | \
       tar -xz --strip 1 -C "${SPARK_HOME}/" && \
     apk del --purge wget && \
